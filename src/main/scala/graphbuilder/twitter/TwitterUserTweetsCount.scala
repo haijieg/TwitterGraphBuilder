@@ -43,7 +43,7 @@ def main(args: Array[String]) {
             case None => ("@***", 0)
           }
         }
-      } reduceByKey(_ + _, 256) filter { case (user, count) => count > 10}
+      } reduceByKey(_ + _, 256) // filter { case (user, count) => count > 10}
       counts map mapformat saveAsTextFile(outputpath)
       spark.logInfo("done")	
 	  sys.exit(0)
