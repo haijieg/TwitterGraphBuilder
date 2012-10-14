@@ -11,7 +11,6 @@ object TweetsCount {
 def usage() {
   println ("usage: TweetsCount <hostname> <inputpath> <outputpath>")
 }
-
   
 def main(args: Array[String]) {
 	  if (args.length < 3) {
