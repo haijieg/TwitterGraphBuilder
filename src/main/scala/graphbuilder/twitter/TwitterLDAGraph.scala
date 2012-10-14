@@ -56,22 +56,24 @@ object TwitterLDAGraph {
 	  edgelist.saveAsTextFile(outputpath+"/edges")  
 	  spark.logInfo("Extracted edges: " + (edgelist.count()))
 	  
-	  /*
+	  
 	  edgelist.cache()
 	  
 	  spark.logInfo("Get vertices... ")	  
 	  val vertexlist = edgelist flatMap{case ((user), (word, count)) => List(user, word)}	  
 	  spark.logInfo("Extracted vertices: " + (vertexlist.count()))
-	  	  
+	  	
+	  /*
 	  edgelist.saveAsTextFile(outputpath+"/edges")  
 	  vertexlist.saveAsTextFile(outputpath+"/vertices")
 	  vertexlist.cache()
+	  */
 	  
 	  // Raw id to int id map
 	  spark.logInfo("Create vidmap... ")	  	  
 	  val vidmap = NormalizeVidMap.createVidMap(spark, vertexlist)
 	  spark.logInfo("Unique vertices: " + (vidmap.count()))
-	  vidmap.cache()
+	  // vidmap.cache()
 	  vidmap map vidmapformat saveAsTextFile(outputpath+"/vidmap")
 	  
 	  // Normalize ids in the edge list
@@ -79,7 +81,7 @@ object TwitterLDAGraph {
 	  val normalizedEdgeList = NormalizeVidMap.translateEdgeWithData(spark, vidmap, edgelist)
 	  (normalizedEdgeList map edgeformat) saveAsTextFile(outputpath +"/normalizedEdges")
 	  spark.logInfo("Done")
-	  */
+	  
 	  sys.exit(0)
   }	
 }
