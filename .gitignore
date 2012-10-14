@@ -1,3 +1,4 @@
+.cache
 target/
 lib_managed/
 project/boot/
