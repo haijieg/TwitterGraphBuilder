@@ -45,15 +45,16 @@ object TwitterLDAGraph {
       val host = args(0)
       val inputpath = args(1)
       val outputpath = args(2)
+      
+      
       val spark = new SparkContext(host, "makeLDGraph", System.getenv("SPARK_HOME"),
 	      List("/root/spark/TwitterGraphBuilder.jar"))
   
 	  val file = spark.textFile(inputpath)
 	  spark.logInfo("Get edges... ")
 	  val edgelist = ((file flatMap (getEdges))
-			  		.reduceByKey{_ + _})
+			  		.reduceByKey ({_ + _}, 256))
 			  		.map {case ((user, word), count) => ((user), (word, count))}
-	  edgelist.saveAsTextFile(outputpath+"/edges")  
 	  spark.logInfo("Extracted edges: " + (edgelist.count()))
 	  
 	  
@@ -62,11 +63,11 @@ object TwitterLDAGraph {
 	  spark.logInfo("Get vertices... ")	  
 	  val vertexlist = edgelist flatMap{case ((user), (word, count)) => List(user, word)}	  
 	  spark.logInfo("Extracted vertices: " + (vertexlist.count()))
-	  	
+	  // vertexlist.cache()
+		
 	  /*
 	  edgelist.saveAsTextFile(outputpath+"/edges")  
 	  vertexlist.saveAsTextFile(outputpath+"/vertices")
-	  vertexlist.cache()
 	  */
 	  
 	  // Raw id to int id map

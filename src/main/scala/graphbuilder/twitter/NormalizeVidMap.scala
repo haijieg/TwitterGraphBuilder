@@ -15,20 +15,20 @@ object NormalizeVidMap {
   }
   
   def uniqIds(sc: SparkContext, vertexlist: spark.RDD[String]) : spark.RDD[String] = {
-    ((vertexlist.map (w => (w, ()))).groupByKey).map {case (x, _) => x} 
+    ((vertexlist.map (w => (w, ()))).groupByKey(256)).map {case (x, _) => x} 
   }
   
   def translateEdge(sc: SparkContext, vidmap: spark.RDD[(String, Int)], edgelist: spark.RDD[(String, String)]) :
   	spark.RDD[(Int, Int)] = {
-    val transSource = vidmap.join(edgelist).map { case (source, (sourceid, target)) => (target, sourceid)}
-    val transTarget = transSource.join(vidmap).map { case (target, (targetid, sourceid)) => (sourceid, targetid)}
+    val transSource = vidmap.join(edgelist, 256).map { case (source, (sourceid, target)) => (target, sourceid)}
+    val transTarget = transSource.join(vidmap, 256).map { case (target, (targetid, sourceid)) => (sourceid, targetid)}
     transTarget 
   }
   
     def translateEdgeWithData[T](sc: SparkContext, vidmap: spark.RDD[(String, Int)],
         edgelist: spark.RDD[((String), (String, T))]) : spark.RDD[(Int, Int, T)] = {
-    val transSource = vidmap.join(edgelist).map { case (source, (sourceid, (target, data))) => (target, (sourceid, data))}
-    val transTarget = vidmap.join(transSource).map { case (target, (targetid, (sourceid, data))) => (sourceid, targetid, data)}
+    val transSource = vidmap.join(edgelist, 256).map { case (source, (sourceid, (target, data))) => (target, (sourceid, data))}
+    val transTarget = vidmap.join(transSource, 256).map { case (target, (targetid, (sourceid, data))) => (sourceid, targetid, data)}
     transTarget 
   }
 }
