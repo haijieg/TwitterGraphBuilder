@@ -6,16 +6,8 @@ import spark.RDD
 import scala.collection.mutable.HashMap
 
 object NormalizeVidMap {
-  def createVidMap(sc: SparkContext, vertexlist: spark.RDD[String]) : spark.RDD[(String, Int)]= {
-    val rawids = uniqIds(sc, vertexlist)
-    val num_vertices = rawids.count().toInt
-    /*val newids = sc.parallelize(0 to num_vertices-1)
-    rawids.cartesian(newids)*/
-    sc.parallelize(rawids.collect().zip((0 to num_vertices -1)))
-  }
-  
   def uniqIds(sc: SparkContext, vertexlist: spark.RDD[String]) : spark.RDD[String] = {
-    ((vertexlist.map (w => (w, ()))).groupByKey(256)).map {case (x, _) => x} 
+    (vertexlist.map (w => (w, 1))) reduceByKey(_+_, 256) map {case (x, _) => x} 
   }
   
   def translateEdge(sc: SparkContext, vidmap: spark.RDD[(String, Int)], edgelist: spark.RDD[(String, String)]) :
