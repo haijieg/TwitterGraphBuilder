@@ -41,39 +41,38 @@ object TwitterLDAGraph {
       val inputpath = args(1)
       val outputpath = args(2)
       
-      val spark = new SparkContext(host, "makeLDGraph", System.getenv("SPARK_HOME"),
-	      List("/root/spark/TwitterGraphBuilder.jar"))
+      val spark = new SparkContext(host, "makeLDGraph")
 	  val file = spark.textFile(inputpath)
 	  
 	  /* Get Edges */
-	  spark.logInfo("Get edges... ")
+	  System.out.println("Get edges... ")
 	  val edgelist = ((file flatMap (getEdges))
 			  		.reduceByKey ({_ + _}, 256))
 			  		.map {case ((user, word), count) => ((user), (word, count))}
       				.cache()
-	  spark.logInfo("Extracted edges: " + (edgelist.count()))
+	  System.out.println("Extracted edges: " + (edgelist.count()))
 	  
-	  spark.logInfo("Get vertices... ")	  
+	  System.out.println("Get vertices... ")	  
 	  val vertexlist = edgelist flatMap{case ((user), (word, count)) => List(user, word)}      				
-	  spark.logInfo("Extracted vertices: " + (vertexlist.count()))
+	  System.out.println("Extracted vertices: " + (vertexlist.count()))
 		
 	  // edgelist.saveAsTextFile(outputpath+"/edges")  
 	  // vertexlist.saveAsTextFile(outputpath+"/vertices")
 	  
 	  /* Build Rawid to Normalized Id map */
-	  spark.logInfo("Create vidmap... ")
+	  System.out.println("Create vidmap... ")
 	  val uniqverts = NormalizeVidMap.uniqIds(spark, vertexlist) cache()
 	  val uniqwords  = uniqverts.filter( w => !w.startsWith("@") ) cache()
 	  val uniqusers = uniqverts filter {w => w.startsWith("@")} cache()
 	  val numwords = uniqwords.count().toInt
 	  val numusers = uniqusers.count().toInt
-	  spark.logInfo("Unique users: " + numwords)
-	  spark.logInfo("Unique words: " + numusers)	  
+	  System.out.println("Unique users: " + numwords)
+	  System.out.println("Unique words: " + numusers)	  
 	  uniqusers saveAsTextFile(outputpath + "/vidmap/users")
 	  uniqwords saveAsTextFile(outputpath + "/vidmap/words") 
 	
 	  // Normalize ids in the edge list
-	  spark.logInfo("Create normalized edge... ")
+	  System.out.println("Create normalized edge... ")
 	  val vidmap = spark.parallelize ((uniqwords.collect() ++ uniqverts.collect()) zip (0 to numwords+numusers-1)) cache()
 	  //val wordmap = uniqwords.cartesian(spark.parallelize(0 to numwords-1))
 	  //val usermap = uniqwords.cartesian(spark.parallelize(numwords to numwords+numusers-1))
@@ -84,8 +83,8 @@ object TwitterLDAGraph {
 	  // Save userid and wordid
 	  //usermap map {case (user, id) => id + "\t" + user} saveAsTextFile(outputpath + "/vidmap/userid")
 	  //wordmap map {case (word, id) => id + "\t" + word} saveAsTextFile(outputpath + "/vidmap/wordid")
-	 
-	  spark.logInfo("Done")  
+	  
+	  System.out.println("Done")  
 	  sys.exit(0)
   }	
 }

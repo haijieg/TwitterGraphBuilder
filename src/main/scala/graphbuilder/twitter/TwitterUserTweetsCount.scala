@@ -33,8 +33,7 @@ def main(args: Array[String]) {
       val host = args(0)
       val inputpath = args(1)
       val outputpath = args(2)
-	  val spark = new SparkContext(host, "UserTweetsCount", System.getenv("SPARK_HOME"),
-	      List("/root/spark/TwitterGraphBuilder.jar"))  
+	  val spark = new SparkContext(host, "UserTweetsCount")  
 	  val file = spark.textFile(inputpath)
 	  val counts = file map {
         line => {
@@ -45,7 +44,7 @@ def main(args: Array[String]) {
         }
       } reduceByKey(_ + _, 256) // filter { case (user, count) => count > 10}
       counts map mapformat saveAsTextFile(outputpath)
-      spark.logInfo("done")	
+      System.out.println("done")	
 	  sys.exit(0)
   }	
 }
