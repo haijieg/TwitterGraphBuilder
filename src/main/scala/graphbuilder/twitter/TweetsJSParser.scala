@@ -4,6 +4,7 @@ import scala.collection.mutable
 import cmu.arktweetnlp.Tagger
 import cmu.arktweetnlp.Twokenize
 import scala.io.Source
+import scala.collection.JavaConversions._
 
 class TweetsJSParser (str: String){
   def rtChain() : List[String] = {
@@ -28,10 +29,19 @@ class TweetsJSParser (str: String){
     }
   }
   
+  def tokenize() : Seq[String] = {
+      parsedTweet.get("text") match {
+	   case Some(value:String) => {
+	     val tokenlist = Twokenize.tokenize(value)
+	     tokenlist
+	   }
+	   case _ => List()
+      }
+  }
+  
   def bagOfWords(f: String => Boolean) : mutable.Map[String, Int] = {
 	  parsedTweet.get("text") match {
 	   case Some(value:String) => {
-	     /*
 	     val tokenlist = TaggerWrapper.tokenizeAndTag(value)
 	     val map = mutable.Map[String, Int]()
 	     val it = tokenlist.iterator()
@@ -45,14 +55,6 @@ class TweetsJSParser (str: String){
 	           f (token)) {	        
 	         map.update(token, (map.getOrElse(token, 0) + 1))
 	       }	     
-	     }*/
-	     val tokenlist = Twokenize.tokenize(value)
-	     val map = mutable.Map[String, Int]()
-	     val it = tokenlist.iterator()
-	     while(it.hasNext()) {
-	       val token:String = it.next().toLowerCase()
-	       if (f (token))
-	    	   map.update(token, (map.getOrElse(token, 0)+1))
 	     }
 	     map
 	   }
