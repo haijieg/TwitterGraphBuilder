@@ -39,9 +39,17 @@ class TweetsJSParser (str: String){
       }
   }
   
+  def getText() : String = {
+    parsedTweet.get("text") match {
+      case Some(v:String) => v
+      case _ => "***EMPTYTEXT***"
+    }
+  }
+  
   def bagOfWords(f: String => Boolean) : mutable.Map[String, Int] = {
 	  parsedTweet.get("text") match {
 	   case Some(value:String) => {
+	     val normalizedVal = value.toLowerCase().replaceAll("\\.{2,+}", "\\.");
 	     val tokenlist = TaggerWrapper.tokenizeAndTag(value)
 	     val map = mutable.Map[String, Int]()
 	     val it = tokenlist.iterator()

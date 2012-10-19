@@ -23,6 +23,7 @@ public class TestTwokenizer {
 			while((line = buffered.readLine()) != null) {
 				try {
 					TweetsJSParser parser = new TweetsJSParser(line);
+					System.out.println (parser.getText());
 					parser.tokenize();
 					parsedcount++;
 				} catch (Exception e) {
@@ -32,5 +33,12 @@ public class TestTwokenizer {
 					System.out.println("Parsed " + parsedcount + "Tweets");
 			}
 		}
+		/*
+		String test = "7h... nh? a nh“u th?t nh“u ^^~...............................................";
+		test = test.toLowerCase().replaceAll("\\.{3,}", "\\.");
+		System.out.println(test);
+		Twokenize.tokenize(test);
+		System.out.println("done");
+		*/
 	}
 }
