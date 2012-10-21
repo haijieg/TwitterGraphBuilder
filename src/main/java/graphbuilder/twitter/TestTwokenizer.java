@@ -23,7 +23,6 @@ public class TestTwokenizer {
 			while((line = buffered.readLine()) != null) {
 				try {
 					TweetsJSParser parser = new TweetsJSParser(line);
-					System.out.println (parser.getText());
 					parser.tokenize();
 					parsedcount++;
 				} catch (Exception e) {

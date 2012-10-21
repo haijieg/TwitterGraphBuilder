@@ -18,7 +18,7 @@ def usage() {
 def getScreenName(str: String) : Option[String] = {
    try {
       val Parser = new TweetsJSParser(str) 
-      Parser.screenName()
+      Some(Parser.screenName)
    } catch {
      case e => e.printStackTrace()
      None
@@ -33,7 +33,8 @@ def main(args: Array[String]) {
       val host = args(0)
       val inputpath = args(1)
       val outputpath = args(2)
-	  val spark = new SparkContext(host, "UserTweetsCount")  
+	  val spark = new SparkContext(host, "UserTweetsCount", System.getenv("SPARK_HOME"),
+          List("target/deps.jar", "target/scala-2.9.2/twittergraphbuilder_2.9.2-0.0.1.jar"))  
 	  val file = spark.textFile(inputpath)
 	  val counts = file map {
         line => {

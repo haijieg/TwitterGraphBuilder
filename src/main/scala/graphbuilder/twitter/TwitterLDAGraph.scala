@@ -14,16 +14,13 @@ object TwitterLDAGraph {
   
   def getEdges (input: String) : mutable.Map[(String, String), Int] = {
     try {
-    val Parser = new TweetsJSParser(input) 
-      Parser.screenName() match {
-        case Some(name) => {
-        	val wc = Parser.bagOfWords( TextFilter.filter )
-            val edges = wc map { case (word, count) => ((name, word), count) }
-        	edges
-        }
-        case None => mutable.Map[(String, String), Int]()
-      }
-    } catch {
+      val Parser = new TweetsJSParser(input) 
+      val name = Parser.screenName()
+      val wc = Parser.bagOfWords( TextFilter.filter )
+      val edges = wc map { case (word, count) => ((name, word), count) }
+      edges
+    }
+    catch {
     	case e => e.printStackTrace(); mutable.Map[(String, String), Int]()
     }
   }
@@ -41,7 +38,8 @@ object TwitterLDAGraph {
       val inputpath = args(1)
       val outputpath = args(2)
       
-      val spark = new SparkContext(host, "makeLDGraph")
+      val spark = new SparkContext(host, "makeLDGraph", System.getenv("SPARK_HOME"),
+          List("target/deps.jar", "target/scala-2.9.2/twittergraphbuilder_2.9.2-0.0.1.jar"))
 	  val file = spark.textFile(inputpath)
 	  
 	  /* Get Edges */
