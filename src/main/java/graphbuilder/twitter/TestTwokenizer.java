@@ -34,7 +34,7 @@ public class TestTwokenizer {
 			}
 		}
 		/*
-		String test = "7h... nh? a nh“u th?t nh“u ^^~...............................................";
+		String test = "...............................................";
 		test = test.toLowerCase().replaceAll("\\.{3,}", "\\.");
 		System.out.println(test);
 		Twokenize.tokenize(test);
