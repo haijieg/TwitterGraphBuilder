@@ -1,17 +1,14 @@
 package graphbuilder.twitter;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.util.zip.GZIPInputStream;
+import java.util.List;
+
+import cmu.arktweetnlp.Twokenize;
 
 public class TestTwokenizer {
 	public static void main (String[] args) throws FileNotFoundException, IOException {
+		/*
 		File inputpath = new File(args[0]);
 		int parsedcount = 0;
 		for (File file : inputpath.listFiles()) {
@@ -32,12 +29,14 @@ public class TestTwokenizer {
 					System.out.println("Parsed " + parsedcount + "Tweets");
 			}
 		}
-		/*
-		String test = "...............................................";
-		test = test.toLowerCase().replaceAll("\\.{3,}", "\\.");
-		System.out.println(test);
-		Twokenize.tokenize(test);
-		System.out.println("done");
 		*/
+		
+		String test = ".........   ..................." +
+				"   ............................................................";
+		// test = test.toLowerCase().replaceAll("\\.{3,}", "\\.");
+		System.out.println(test);
+		List<String> ls = Twokenize.tokenize(test);
+		System.out.println(ls.size());
+		System.out.println("done");		
 	}
 }
