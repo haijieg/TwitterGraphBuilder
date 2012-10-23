@@ -30,15 +30,16 @@ object TwitterLDAGraph {
   }
   
   def main(args: Array[String]) {
-	  if (args.length < 3) {
+	  if (args.length < 4) {
 	    usage()
 	    sys.exit(1)
 	  }	    
       val host = args(0)
-      val inputpath = args(1)
-      val outputpath = args(2)
+      val sparkhome = args(1)
+      val inputpath = args(2)
+      val outputpath = args(3)
       
-      val spark = new SparkContext(host, "makeLDGraph", System.getenv("SPARK_HOME"),
+      val spark = new SparkContext(host, "makeLDGraph", sparkhome,
           List("target/deps.jar", "target/scala-2.9.2/twittergraphbuilder_2.9.2-0.0.1.jar"))
 	  val file = spark.textFile(inputpath)
 	  
