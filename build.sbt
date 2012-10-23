@@ -31,6 +31,7 @@ mergeStrategy in assembly <<= (mergeStrategy in assembly) { (old) =>
     case PathList("javax", "servlet", xs @ _*) => MergeStrategy.first
     case PathList("com", "google", "common",  xs @ _*) => MergeStrategy.first
     case PathList("org", "apache", "commons", xs @ _*) => MergeStrategy.first
+    case PathList("org", "apache", "jasper", xs @ _*) => MergeStrategy.first
     case PathList("javax", "xml", xs @ _*) => MergeStrategy.first
     case PathList("org", "objectweb", xs @ _*) => MergeStrategy.first
     case PathList("META-INF", "maven", xs @ _*) => MergeStrategy.discard

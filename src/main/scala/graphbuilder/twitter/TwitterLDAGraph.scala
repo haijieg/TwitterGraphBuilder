@@ -5,7 +5,6 @@ import spark.SparkContext
 import SparkContext._
 import scala.collection.mutable.ListBuffer
 import spark.RDD
-import scala.collection.mutable.HashMap
 
 object TwitterLDAGraph {
 
@@ -26,7 +25,7 @@ object TwitterLDAGraph {
     }
   }
 
-  def usage() {
+   def usage() {
     println ("usage: TwitterLDAGraph <hostname> <inputpath> <outputpath>")
   }
   
@@ -47,12 +46,12 @@ object TwitterLDAGraph {
 	  System.out.println("Get edges... ")
 	  val edgelist = ((file flatMap (getEdges))
 			  		.reduceByKey ({_ + _}, 256))
+			  		.map {case ((user, word), count) => ((user), (word, count))}
       				.cache()
 	  System.out.println("Extracted edges: " + (edgelist.count()))
 	  
-	  /* Get Vertices */	  
 	  System.out.println("Get vertices... ")	  
-	  val vertexlist = edgelist flatMap{case ((user, word), count) => List(user, word)}      				
+	  val vertexlist = edgelist flatMap{case ((user), (word, count)) => List(user, word)}      				
 	  System.out.println("Extracted vertices: " + (vertexlist.count()))
 		
 	  // edgelist.saveAsTextFile(outputpath+"/edges")  
@@ -60,33 +59,23 @@ object TwitterLDAGraph {
 	  
 	  /* Build Rawid to Normalized Id map */
 	  System.out.println("Create vidmap... ")
-	  val uniqverts = NormalizeVidMap.uniqIds(spark, vertexlist).cache()
+	  val uniqverts = NormalizeVidMap.uniqIds(spark, vertexlist) cache()
 	  val uniqwords  = uniqverts.filter( w => !w.startsWith("@") ) cache()
 	  val uniqusers = uniqverts filter {w => w.startsWith("@")} cache()
-	  uniqusers saveAsTextFile(outputpath + "/vidmap/users")
-	  uniqwords saveAsTextFile(outputpath + "/vidmap/words")
-	  
-	  val numusers = uniqusers.count().toInt
 	  val numwords = uniqwords.count().toInt
-	  
-	  val userlist = uniqwords.collect().zip(0 to numusers-1)
-	  val wordlist = uniqwords.collect().zip(numwords to numwords + numusers-1)
-	  val usermap = spark.broadcast(new HashMap() ++ userlist)
-	  val wordmap = spark.broadcast(new HashMap() ++ wordlist)
-	  	  
+	  val numusers = uniqusers.count().toInt
+	  System.out.println("Unique users: " + numwords)
+	  System.out.println("Unique words: " + numusers)	  
+	  uniqusers saveAsTextFile(outputpath + "/vidmap/users")
+	  uniqwords saveAsTextFile(outputpath + "/vidmap/words") 
+	
 	  // Normalize ids in the edge list
 	  System.out.println("Create normalized edge... ")
-	  /*
-	  val vidmap = spark.parallelize ((uniqwords.collect() ++ uniqverts.collect())
-	      .zip (0 to numwords+numusers-1))
-	      .groupByKey()
-	      .cache()
-	  */
-	 
+	  val vidmap = spark.parallelize ((uniqwords.collect() ++ uniqverts.collect()) zip (0 to numwords+numusers-1)) cache()
 	  //val wordmap = uniqwords.cartesian(spark.parallelize(0 to numwords-1))
 	  //val usermap = uniqwords.cartesian(spark.parallelize(numwords to numwords+numusers-1))
 	  //val vidmap = wordmap union usermap cache
-	  val normalizedEdgeList = edgelist.map { case ((user, word), count) => (usermap.value(user), wordmap.value(word), count)}
+	  val normalizedEdgeList = NormalizeVidMap.translateEdgeWithData(spark, vidmap, edgelist)
 	  (normalizedEdgeList map edgeformat) saveAsTextFile(outputpath +"/normalizedEdges")
 	  	  
 	  // Save userid and wordid
