@@ -1,12 +1,12 @@
 package graphbuilder.twitter
 import scala.collection.mutable
-import scala.io.Source
-import spark.SparkContext
-import SparkContext._
-import scala.collection.mutable.ListBuffer
-import spark.RDD
 
-object TwitterLDAGraph {
+import spark.SparkContext._
+import spark.RDD
+import spark.SparkContext
+import spark.storage.StorageLevel
+import spark.broadcast.Broadcast
+object FastLDAGraph {
 
   def edgeformat (e : (Int, Int, Int)): String = {
     e._1 + "\t" + e._2 + "\t" + e._3
@@ -50,12 +50,14 @@ object TwitterLDAGraph {
 			  		.map {case ((user, word), count) => ((user), (word, count))}
       				.cache()
 	  System.out.println("Extracted edges: " + (edgelist.count()))
+	  System.out.println("Save edges: " + (edgelist.count()))
+	  edgelist.map {case ((user), (word, count)) => user + "\t" + word + "\t" + count}
+      		  .saveAsTextFile(outputpath+"/edges")  
+	  
 	  
 	  System.out.println("Get vertices... ")	  
 	  val vertexlist = edgelist flatMap{case ((user), (word, count)) => List(user, word)}      				
 	  System.out.println("Extracted vertices: " + (vertexlist.count()))
-		
-	  // edgelist.saveAsTextFile(outputpath+"/edges")  
 	  // vertexlist.saveAsTextFile(outputpath+"/vertices")
 	  
 	  /* Build Rawid to Normalized Id map */
@@ -70,19 +72,15 @@ object TwitterLDAGraph {
 	  uniqusers saveAsTextFile(outputpath + "/vidmap/users")
 	  uniqwords saveAsTextFile(outputpath + "/vidmap/words") 
 	
-	  // Normalize ids in the edge list
+	  /* Normalize edges */
 	  System.out.println("Create normalized edge... ")
-	  val vidmap = spark.parallelize ((uniqwords.collect() ++ uniqverts.collect()) zip (0 to numwords+numusers-1)) cache()
-	  //val wordmap = uniqwords.cartesian(spark.parallelize(0 to numwords-1))
-	  //val usermap = uniqwords.cartesian(spark.parallelize(numwords to numwords+numusers-1))
-	  //val vidmap = wordmap union usermap cache
-	  val normalizedEdgeList = NormalizeVidMap.translateEdgeWithData(spark, vidmap, edgelist)
+	  val wordmap = spark.broadcast(((uniqwords.collect()) zip (0 to numwords-1)) toMap)
+	  val usermap = spark.broadcast(((uniqusers.collect()) zip (0 to numusers-1)) toMap)
+	  val normalizedEdgeList = edgelist map {
+	    case ((user), (word, count)) => (usermap.value(user) + numwords, wordmap.value(word), count)
+	  }
 	  (normalizedEdgeList map edgeformat) saveAsTextFile(outputpath +"/normalizedEdges")
-	  	  
-	  // Save userid and wordid
-	  //usermap map {case (user, id) => id + "\t" + user} saveAsTextFile(outputpath + "/vidmap/userid")
-	  //wordmap map {case (word, id) => id + "\t" + word} saveAsTextFile(outputpath + "/vidmap/wordid")
-	  
+	  	 
 	  System.out.println("Done")  
 	  sys.exit(0)
   }	

@@ -6,7 +6,7 @@ import SparkContext._
 import scala.collection.mutable.ListBuffer
 import spark.RDD
 
-object TwitterUserTweetsCount {
+object UserTweetsCount {
 def mapformat (m : (String, Int)) : String = {
   m._1 + "\t" + m._2
 }
