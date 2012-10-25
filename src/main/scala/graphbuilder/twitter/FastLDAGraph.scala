@@ -67,8 +67,8 @@ object FastLDAGraph {
 	  val uniqusers = uniqverts filter {w => w.startsWith("@")} cache()
 	  val numwords = uniqwords.count().toInt
 	  val numusers = uniqusers.count().toInt
-	  System.out.println("Unique users: " + numwords)
-	  System.out.println("Unique words: " + numusers)	  
+	  System.out.println("Unique users: " + numusers)
+	  System.out.println("Unique words: " + numwords)	  
 	  uniqusers saveAsTextFile(outputpath + "/vidmap/users")
 	  uniqwords saveAsTextFile(outputpath + "/vidmap/words") 
 	

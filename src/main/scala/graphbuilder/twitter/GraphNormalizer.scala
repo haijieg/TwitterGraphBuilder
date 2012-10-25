@@ -8,6 +8,7 @@ import spark.storage.StorageLevel
 import spark.broadcast.Broadcast
 import spark.HashPartitioner
 import spark.HashPartitioner
+import scala.collection.mutable.HashMap
 object GraphNormalizer {
 
   def edgeformat (e : (Int, Int, Int)): String = {
@@ -33,20 +34,20 @@ object GraphNormalizer {
 	
 	  /* Build Rawid to Normalized Id map */
 	  System.out.println("Get user/word list... ")
-	  val uniqusers = spark.textFile(inputpath + "/vidmap/users")
-	  val uniqwords = spark.textFile(inputpath + "/vidmap/words")	  
+	  val uniqusers = spark.textFile(inputpath + "/vidmap/userlist")
+	  val uniqwords = spark.textFile(inputpath + "/vidmap/wordlist")	  
 	  val numwords = uniqwords.count().toInt
 	  val numusers = uniqusers.count().toInt
-	  System.out.println("Unique users: " + numwords)
-	  System.out.println("Unique words: " + numusers)	  
+	  System.out.println("Unique users: " + numusers)
+	  System.out.println("Unique words: " + numwords)	  
 	  
 	  
 	  /* Normalize edges */
 	  System.out.println("Create user/word id map... ")	  
 	  val wordmap = spark.broadcast(((uniqwords.collect()) zip (0 to numwords-1)) toMap)
 	  val usermap = spark.broadcast(((uniqusers.collect()) zip (0 to numusers-1)) toMap)
-	 
-	   /* Get Edges */
+
+	  /* Get Edges */
 	  System.out.println("Get edges... ")
 	  val edgelist = spark.textFile(inputpath +"/edges").
 	  					map { w => {val sp = w.split("\t"); (sp(0), sp(1), sp(2).toInt)}}      	  
@@ -79,3 +80,4 @@ object GraphNormalizer {
 	  sys.exit(0)
   }	
 }
+
