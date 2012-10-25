@@ -50,12 +50,18 @@ object GraphNormalizer {
 	  /* Get Edges */
 	  System.out.println("Get edges... ")
 	  val edgelist = spark.textFile(inputpath +"/edges").
-	  					map { w => {val sp = w.split("\t"); (sp(0), sp(1), sp(2).toInt)}}      	  
-	 
+	  					map { w => {val sp = w.split("\t"); 
+	  					if (sp.length == 3) {
+	  					    (sp(0), sp(1), sp(2).toInt)
+	  					} else {
+	  					 System.err.println("Illegal edge: " + w)
+	  					 ("**", "**", 0)
+	  					}}
+	  					}
+      
       System.out.println("Create normalized edge... ")	  
-	  val normalizedEdgeList = edgelist map {
-	    case ((user, word, count)) => (usermap.value(user) + numwords, wordmap.value(word), count)
-	  }
+	  val normalizedEdgeList = edgelist.filter {case(user, word, count) => count != 0}
+	  .map {case ((user, word, count)) => (usermap.value(user) + numwords, wordmap.value(word), count)}
 	  (normalizedEdgeList map edgeformat) saveAsTextFile(outputpath +"/normalizedEdges")
 	  	 
 	  	  
