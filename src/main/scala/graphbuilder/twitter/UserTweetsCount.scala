@@ -12,7 +12,7 @@ def mapformat (m : (String, Int)) : String = {
 }
 
 def usage() {
-  println ("usage: TwitterUserTweetsCount <hostname> <inputpath> <outputpath>")
+  println ("usage: TweetsCount <hostname> <sparkhome> <inputpath> <outputpath>")
 }
 
 def getScreenName(str: String) : Option[String] = {
@@ -34,7 +34,7 @@ def main(args: Array[String]) {
       val sparkhome = args(1)
       val inputpath = args(2)
       val outputpath = args(3)
-	  val spark = new SparkContext(host, "UserTweetsCount", sparkhome,
+	  val spark = new SparkContext(host, "TweetsCount", sparkhome,
           List("target/deps.jar", "target/scala-2.9.2/twittergraphbuilder_2.9.2-0.0.1.jar"))  
 	  val file = spark.textFile(inputpath)
 	  val counts = file map {

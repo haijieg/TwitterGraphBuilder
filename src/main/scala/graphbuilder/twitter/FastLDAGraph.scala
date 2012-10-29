@@ -26,7 +26,7 @@ object FastLDAGraph {
   }
 
    def usage() {
-    println ("usage: TwitterLDAGraph <hostname> <inputpath> <outputpath>")
+    println ("usage: FastLDAGraph <hostname> <sparkhome> <inputpath> <outputpath>")
   }
   
   def main(args: Array[String]) {
@@ -39,7 +39,7 @@ object FastLDAGraph {
       val inputpath = args(2)
       val outputpath = args(3)
       
-      val spark = new SparkContext(host, "makeLDGraph", sparkhome,
+      val spark = new SparkContext(host, "FastLDGraph", sparkhome,
           List("target/deps.jar", "target/scala-2.9.2/twittergraphbuilder_2.9.2-0.0.1.jar"))
 	  val file = spark.textFile(inputpath)
 	  

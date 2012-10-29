@@ -16,7 +16,7 @@ object GraphNormalizer {
   }
 
    def usage() {
-    println ("usage: TwitterLDAGraph <hostname> <inputpath> <outputpath>")
+    println ("usage: GraphNormalizer <hostname> <sparkhome> <inputpath> <outputpath>")
   }
   
   def main(args: Array[String]) {
@@ -29,7 +29,7 @@ object GraphNormalizer {
       val inputpath = args(2)
       val outputpath = args(3)
       
-      val spark = new SparkContext(host, "makeLDGraph", sparkhome,
+      val spark = new SparkContext(host, "GraphNormalizer", sparkhome,
           List("target/deps.jar", "target/scala-2.9.2/twittergraphbuilder_2.9.2-0.0.1.jar"))
 	
 	  /* Build Rawid to Normalized Id map */

@@ -28,7 +28,7 @@ object LDAGraph {
   }
 
    def usage() {
-    println ("usage: TwitterLDAGraph <hostname> <inputpath> <outputpath>")
+    println ("usage: LDAGraph <hostname> <sparkhome> <inputpath> <outputpath>")
   }
   
   def main(args: Array[String]) {
@@ -41,7 +41,7 @@ object LDAGraph {
       val inputpath = args(2)
       val outputpath = args(3)
       
-      val spark = new SparkContext(host, "makeLDGraph", sparkhome,
+      val spark = new SparkContext(host, "LDGraph", sparkhome,
           List("target/deps.jar", "target/scala-2.9.2/twittergraphbuilder_2.9.2-0.0.1.jar"))
 	  val file = spark.textFile(inputpath)
 	  
@@ -78,9 +78,7 @@ object LDAGraph {
 	  System.out.println("Create user/word id map... ")	  
 	  val wordmap = uniqwords.cartesian(spark.parallelize(0 to numwords-1)).partitionBy((new HashPartitioner(8)))
 	  val usermap = uniqusers.cartesian(spark.parallelize(numwords to numwords+numusers-1)).partitionBy((new HashPartitioner(8)))
-	  //val wordmap = spark.parallelize(uniqwords.collect() zip (0 to numwords-1)).partitionBy((new HashPartitioner(8)))
-	  //val usermap = spark.parallelize(uniqusers.collect() zip (numwords to numwords+numusers-1)).partitionBy((new HashPartitioner(8)))
-	  
+  
 	  /* Normalize edges */
 	  System.out.println("Create normalized edge... ")
 	  val normalizedEdgeList = NormalizeVidMap.translateEdgeWithData(spark, usermap, wordmap, edgelist)
