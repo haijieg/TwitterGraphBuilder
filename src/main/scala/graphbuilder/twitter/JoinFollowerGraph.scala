@@ -36,14 +36,14 @@ object JoinFollowerGraph {
       
       // broad follower id map
       System.out.println("Broadcast maps...")      
-      val followeridbc = spark.broadcast(followeridmap.collectAsMap())
+      val userfeaturesbc = spark.broadcast(userfeatures.collectAsMap())
       
       System.out.println("Map ids...")
       // map features using id map
-      val mappedfeatures = userfeatures.filter{
-        case (id, feature) => followeridbc.value.contains(id) 
+      val mappedfeatures = followeridmap.filter{
+        case (name, id) => userfeaturesbc.value.contains(name) 
       }.map {
-        case (id, feature) => followeridbc.value(id) + "\t" + feature.foldLeft("")( (x,y) => x + "\t" + y)
+        case (name, id) => id + "\t" + userfeaturesbc.value(name).foldLeft("")( (x,y) => x + "\t" + y)
       }
       mappedfeatures.saveAsTextFile(outputpath)
       System.out.println("done")

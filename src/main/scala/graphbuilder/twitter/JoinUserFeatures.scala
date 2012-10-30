@@ -11,7 +11,7 @@ import spark.HashPartitioner
 import scala.collection.mutable.HashMap
 object JoinUserFeatures {
    def usage() {
-    println ("usage: FollowerJoinLda <hostname> <sparkhome> <inputpath> <outputpath>")
+    println ("usage: JoinUserFeature <hostname> <sparkhome> <...daily.10k/> <.../daily.10k/ldavertices>")
   }
   
   def main(args: Array[String]) {
@@ -23,11 +23,11 @@ object JoinUserFeatures {
       val sparkhome = args(1)
       val inputpath = args(2)
       val outputpath = args(3)
-      val spark = new SparkContext(host, "FollowerJoinLda", sparkhome,
+      val spark = new SparkContext(host, "JoinUserFeature", sparkhome,
           List("target/deps.jar", "target/scala-2.9.2/twittergraphbuilder_2.9.2-0.0.1.jar"))  
 
       /* Get user topic feature from the result of cgs_lda */ 
-      val usertopic = spark.textFile(inputpath + "/lda/users").map(
+      val usertopic = spark.textFile(inputpath + "/lda/userfeature").map(
           w => {
             val sp = w.split("\t")
             (sp.head.toInt, sp.tail map (x =>x toInt))
