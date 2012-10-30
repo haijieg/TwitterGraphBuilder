@@ -22,7 +22,11 @@ class TweetsJSParser (str: String){
   def getRawText() : String = str
 
   def screenName() : String = {
-    "@"+parsedTweet.get("user").get("screen_name").toString()
+    val name = parsedTweet.get("user").get("screen_name").toString()
+    if (name.isEmpty())
+      "@EMPTYNAME"
+    else
+      "@"+name
   }
   
   def tokenize() : Seq[String] = {
