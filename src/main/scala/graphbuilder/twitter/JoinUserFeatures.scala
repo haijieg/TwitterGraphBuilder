@@ -11,7 +11,7 @@ import spark.HashPartitioner
 import scala.collection.mutable.HashMap
 object JoinUserFeatures {
    def usage() {
-    println ("usage: FollowerJoinLda <hostname> <sparkhome> <inputpath> <followerpath> <outputpath>")
+    println ("usage: FollowerJoinLda <hostname> <sparkhome> <inputpath> <outputpath>")
   }
   
   def main(args: Array[String]) {
@@ -22,8 +22,7 @@ object JoinUserFeatures {
       val host = args(0)
       val sparkhome = args(1)
       val inputpath = args(2)
-      val followerpath = args(3)      
-      val outputpath = args(4)
+      val outputpath = args(3)
       val spark = new SparkContext(host, "FollowerJoinLda", sparkhome,
           List("target/deps.jar", "target/scala-2.9.2/twittergraphbuilder_2.9.2-0.0.1.jar"))  
 
