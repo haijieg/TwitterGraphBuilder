@@ -11,14 +11,15 @@ import spark.HashPartitioner
 import scala.collection.mutable.HashMap
 object JoinUserFeatures {
    def usage() {
-    println ("usage: JoinUserFeature <hostname> <sparkhome> <...daily.10k/> <.../daily.10k/ldavertices>")
-  }
+    println ("usage: JoinUserFeature <hostname> <sparkhome> <...daily.10k/> <.../daily.10k/userfeatures>")
+   }
   
   def main(args: Array[String]) {
 	  if (args.length < 4) {
 	    usage()
 	    sys.exit(1)
-	  }	    
+	  }
+	  
       val host = args(0)
       val sparkhome = args(1)
       val inputpath = args(2)
@@ -47,22 +48,24 @@ object JoinUserFeatures {
 	  val uniqwords = spark.textFile(inputpath + "/lda/vidmap/wordlist")	  
 	  val numwords = uniqwords.count().toInt
 	  val numusers = uniqusers.count().toInt	  
-	  val usermap = spark.broadcast(((uniqusers.collect()) zip (0 to numusers-1)) toMap)
 	  
-	  System.out.println("Join user id map and tweets count... ")	        
-	  val tweetscountmap = 
-	      (tweetscount.
-	          filter{case (name, count) => usermap.value.contains(name)}.
-	          map{case (name, count) => (usermap.value(name) + numwords, count)})
+	  System.out.println("Broadcast usermap... ")	        
+	  val usermap = spark.broadcast(((numwords to numusers+numwords-1) zip (uniqusers.collect())) toMap)
+	  System.out.println("Broadcast tweetscountmap... ")	        	  
+	  val tweetscountmap = spark.broadcast(tweetscount.collectAsMap()) 
+	          	  
+	  System.out.println("Join user id map and tweets count... ")
+	  val userfeatures = usertopic.map {case (id, features) => {
+	    val username = usermap.value(id)
+	    val numtweets = tweetscountmap.value.getOrElse(username, 1)
+	    (username, numtweets, features)
+	  }}
 	  
-	  val tweetscount_bc = spark.broadcast(tweetscountmap.collectAsMap());
-	  System.out.println("Join tweets count map and user topic... ")	        	       
-      val userfeatures = usertopic.map{
-        case (id, topics) => {
-          id + "\t" + tweetscount_bc.value.getOrElse(id, 1) + "\t" + topics.foldLeft("")((x,y) => x + "\t" + y)
-        }
-      }            
-      userfeatures.saveAsTextFile(outputpath)     
+	  
+	  userfeatures.map {
+	    case (name, count, features) => 
+	      name + "\t" + count + "\t" + features.foldLeft("")((x,y) => x + "\t" + y)
+	      }.saveAsTextFile(outputpath)
   }	
 }
 
